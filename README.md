@@ -1,2 +1,11 @@
 # springmvcjpareviews
 spring mvc jpa reviews 2026
+USED TECHNOLOOGIES
+-Java
+-Spring Boot
+-JavaScript
+-Ajax
+-Jquery
+-JQuery UI
+-Postgres
+-Spring JPA

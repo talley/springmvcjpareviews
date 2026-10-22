@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Add Shipper</title>
+</head>
+<body>
+
+    <form id="editForm" th:action="@{/add}" th:object="${shipper}" method="post">
+        <p>
+            <label>Company Name:</label><br>
+            <input type="text" th:field="*{companyName}" maxlength="40" required />
+        </p>
+        <p>
+            <label>Phone:</label><br>
+            <input type="text" th:field="*{phone}" maxlength="24" />
+        </p>
+        <p>
+            <label>Added By:</label><br>
+            <input type="text" th:field="*{addedBy}" />
+        </p>
+    </form>
+
+</body>
+</html>

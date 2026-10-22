@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>List of Shippers</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui@1.14.2/themes/base/theme.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-3.1.4/datatables.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui@1.14.2/dist/themes/base/jquery-ui.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-ui@1.14.2/dist/jquery-ui.min.js"></script>
+<script src="https://cdn.datatables.net/v/dt/dt-3.1.4/datatables.min.js"></script>
+</head>
+<body>
+<button type="button" id="addBtn">Add Shipper</button>
+<hr/>
+  <table border="1" id="shipperstbl">
+        <thead>
+            <tr>
+                <th  style="display: none;">ID</th>
+                <th>Company Name</th>
+                <th>Phone</th>
+                <th>Added On</th>
+                <th>Added By</th>
+                <th>Edited On</th>
+                <th>Edited By</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="s : ${shippers}">
+                <td th:text="${s.shipperId}" style="display: none;"></td>
+                <td th:text="${s.companyName}"></td>
+                <td th:text="${s.phone}"></td>
+                <td th:text="${s.addedOn}"></td>
+                <td th:text="${s.addedBy}"></td>
+                <td th:text="${s.editedOn}"></td>
+                <td th:text="${s.editedBy}"></td>
+               <td><a href="#" th:onclick="|openEditDialog(${s.shipperId}); return false;|">Edit</a></td>
+              <td><a href="#" class="delete-link" th:attr="data-id=${s.shipperId}, data-name=${s.companyName}">Delete</a>
+</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(shippers)}">
+                <td colspan="7">No shippers found.</td>
+            </tr>
+        </tbody>
+    </table>
+    
+<div id="editDialog" title="Edit Shipper"></div>
+<div id="deleteDialog" title="Delete Shipper">
+    <p>Are you sure you want to delete <strong id="deleteName"></strong>?</p>
+</div>
+
+<script>
+var deleteId = null;
+
+function openEditDialog(id) {
+    loadIntoDialog('/edit/' + id, 'Edit Shipper');
+}
+
+function openAddDialog() {
+    loadIntoDialog('/add', 'Add Shipper');
+}
+
+function loadIntoDialog(url, title) {
+    $('#editDialog').load(url + ' #editForm', function (response, status) {
+        if (status === 'error' || $('#editForm').length === 0) {
+            alert('Could not load the form.');
+            return;
+        }
+        $('#editDialog').dialog('option', 'title', title).dialog('open');
+    });
+}
+
+function saveShipper() {
+    var form = $('#editForm')[0];
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    $.post($('#editForm').attr('action'), $('#editForm').serialize())
+        .done(function () {
+            $('#editDialog').dialog('close');
+            location.reload();
+        })
+        .fail(function () {
+            alert('Save failed.');
+        });
+}
+
+function deleteShipper() {
+    $.ajax({ url: '/api/shippers/' + deleteId, type: 'DELETE' })
+        .done(function () {
+            $('#deleteDialog').dialog('close');
+            location.reload();
+        })
+        .fail(function (xhr) {
+            $('#deleteDialog').dialog('close');
+            if (xhr.status === 404) {
+                alert('That shipper no longer exists.');
+                location.reload();
+            } else {
+                alert('Delete failed (HTTP ' + xhr.status + ').');
+            }
+        });
+}
+
+$(function () {
+    $('#shipperstbl').DataTable();
+
+    // Add / Edit dialog
+    $('#editDialog').dialog({
+        autoOpen: false, modal: true, width: 450,
+        buttons: {
+            "Save": function () { saveShipper(); },
+            "Cancel": function () { $(this).dialog('close'); }
+        }
+    });
+    $('#editDialog').on('submit', '#editForm', function (e) {
+        e.preventDefault();
+        saveShipper();
+    });
+    $('#addBtn').on('click', function () { openAddDialog(); });
+
+    // Delete dialog
+    $('#deleteDialog').dialog({
+        autoOpen: false, modal: true, width: 400,
+        buttons: {
+            "Delete": function () { deleteShipper(); },
+            "Cancel": function () { $(this).dialog('close'); }
+        }
+    });
+    $('#shipperstbl').on('click', '.delete-link', function (e) {
+        e.preventDefault();
+        deleteId = $(this).data('id');
+        $('#deleteName').text($(this).data('name'));
+        $('#deleteDialog').dialog('open');
+    });
+});
+</script>
+</body>
+</html>
