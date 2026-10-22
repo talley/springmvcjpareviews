@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Edit Shipper</title>
+</head>
+<body>
+
+    <h1>Edit Shipper</h1>
+
+    <form th:action="@{/edit}" th:object="${shipper}" method="post">
+
+        <input type="hidden" th:field="*{shipperId}" />
+
+        <p>
+            <label>Company Name:</label>
+            <input type="text" th:field="*{companyName}" maxlength="40" required />
+        </p>
+        <p>
+            <label>Phone:</label>
+            <input type="text" th:field="*{phone}" maxlength="24" />
+        </p>
+        <p>
+            <label>Edited By:</label>
+            <input type="text" th:field="*{editedBy}" />
+        </p>
+
+        <button type="submit">Save</button>
+        <a th:href="@{/}">Cancel</a>
+    </form>
+
+</body>
+</html>

@@ -3,6 +3,10 @@ package com.talleyouro.springmvcjpademo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -16,9 +20,35 @@ public class HomeController {
 	    }
 	 
 	@GetMapping("/")
-	public String Index(Model data) {
+	public String Index(Model model) {
 		var shippers=this.shipperRepository.findAll();
-		data.addAttribute("shippers", shippers);
+		model.addAttribute("shippers", shippers);
 		return "index";
+	}
+	
+	@GetMapping("/edit/{shipperId}")
+	public String editShipper(Model model, @PathVariable("shipperId") Short shipperId) {
+
+	    var shipper = this.shipperRepository.findById(shipperId);
+	    if (shipper.isEmpty()) {
+	        return "redirect:/";          // id not found, go back to the list
+	    }
+	    model.addAttribute("shipper", shipper.get());
+	    return "EditShipper";
+	}
+
+	@PostMapping("/edit")
+	public String saveShipper(@ModelAttribute("shipper") Shipper form) {
+
+	    var existing = this.shipperRepository.findById(form.getShipperId());
+	    if (existing.isPresent()) {
+	        Shipper s = existing.get();
+	        s.setCompanyName(form.getCompanyName());
+	        s.setPhone(form.getPhone());
+	        s.setEditedBy(form.getEditedBy());
+	        s.setEditedOn(java.time.LocalDate.now());
+	        this.shipperRepository.save(s);
+	    }
+	    return "redirect:/";
 	}
 }

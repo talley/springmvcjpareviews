@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>List of Shippers</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui@1.14.2/themes/base/theme.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-3.1.4/datatables.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-ui@1.14.2/dist/jquery-ui.min.js"></script>
+<script src="https://cdn.datatables.net/v/dt/dt-3.1.4/datatables.min.js"></script>
 </head>
 <body>
   <table border="1" id="shipperstbl">
@@ -15,6 +20,7 @@
                 <th>Added By</th>
                 <th>Edited On</th>
                 <th>Edited By</th>
+                <th>Edit</th>
             </tr>
         </thead>
         <tbody>
@@ -26,6 +32,7 @@
                 <td th:text="${s.addedBy}"></td>
                 <td th:text="${s.editedOn}"></td>
                 <td th:text="${s.editedBy}"></td>
+                <td><a th:href="@{/edit/{id}(id=${s.shipperId})}">Edit</a></td>
             </tr>
             <tr th:if="${#lists.isEmpty(shippers)}">
                 <td colspan="7">No shippers found.</td>
