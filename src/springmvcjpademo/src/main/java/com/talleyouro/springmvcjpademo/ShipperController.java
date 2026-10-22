@@ -19,7 +19,7 @@ public class ShipperController {
         this.repo = repo;
     }
 
-    // CREATE
+    // Create a shipper 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Shipper shipper) {
         if (shipper.getShipperId() != null && repo.existsById(shipper.getShipperId())) {
@@ -29,7 +29,7 @@ public class ShipperController {
         return ResponseEntity.status(HttpStatus.CREATED).body(repo.save(shipper));
     }
 
-    // READ all (optional ?name= filter)
+    // Get all shippers (optional ?name= filter)
     @GetMapping
     public List<Shipper> getAll(@RequestParam(required = false) String name) {
         if (name != null && !name.isBlank()) {
@@ -38,7 +38,7 @@ public class ShipperController {
         return repo.findAll();
     }
 
-    // READ one
+    // Get a single shipper
     @GetMapping("/{id}")
     public ResponseEntity<Shipper> getById(@PathVariable Short id) {
         return repo.findById(id)
@@ -46,7 +46,7 @@ public class ShipperController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // UPDATE
+    // Update a shipper
     @PutMapping("/{id}")
     public ResponseEntity<Shipper> update(@PathVariable Short id, @RequestBody Shipper in) {
         return repo.findById(id).map(existing -> {
@@ -58,7 +58,7 @@ public class ShipperController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // DELETE
+    // Delete a shipper
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Short id) {
         if (!repo.existsById(id)) {

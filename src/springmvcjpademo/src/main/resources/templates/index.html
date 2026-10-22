@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>List of Shippers</title>
+</head>
+<body>
+  <table border="1" id="shipperstbl">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Company Name</th>
+                <th>Phone</th>
+                <th>Added On</th>
+                <th>Added By</th>
+                <th>Edited On</th>
+                <th>Edited By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="s : ${shippers}">
+                <td th:text="${s.shipperId}"></td>
+                <td th:text="${s.companyName}"></td>
+                <td th:text="${s.phone}"></td>
+                <td th:text="${s.addedOn}"></td>
+                <td th:text="${s.addedBy}"></td>
+                <td th:text="${s.editedOn}"></td>
+                <td th:text="${s.editedBy}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(shippers)}">
+                <td colspan="7">No shippers found.</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
