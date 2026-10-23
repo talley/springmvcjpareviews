@@ -28,23 +28,7 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
-            <tr th:each="s : ${shippers}">
-                <td th:text="${s.shipperId}" style="display: none;"></td>
-                <td th:text="${s.companyName}"></td>
-                <td th:text="${s.phone}"></td>
-                <td th:text="${s.addedOn}"></td>
-                <td th:text="${s.addedBy}"></td>
-                <td th:text="${s.editedOn}"></td>
-                <td th:text="${s.editedBy}"></td>
-               <td><a href="#" th:onclick="|openEditDialog(${s.shipperId}); return false;|">Edit</a></td>
-              <td><a href="#" class="delete-link" th:attr="data-id=${s.shipperId}, data-name=${s.companyName}">Delete</a>
-</td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(shippers)}">
-                <td colspan="7">No shippers found.</td>
-            </tr>
-        </tbody>
+       
     </table>
     
 <div id="editDialog" title="Edit Shipper"></div>
@@ -53,7 +37,12 @@
 </div>
 
 <script>
+var shippersTable;
 var deleteId = null;
+
+function refreshTable() {
+    shippersTable.ajax.reload(null, false);   // false = stay on the current page
+}
 
 function openEditDialog(id) {
     loadIntoDialog('/edit/' + id, 'Edit Shipper');
@@ -82,10 +71,16 @@ function saveShipper() {
     $.post($('#editForm').attr('action'), $('#editForm').serialize())
         .done(function () {
             $('#editDialog').dialog('close');
-            location.reload();
+            refreshTable();
         })
-        .fail(function () {
-            alert('Save failed.');
+        .fail(function (xhr) {
+            if (xhr.status === 404) {
+                alert('That shipper no longer exists.');
+                $('#editDialog').dialog('close');
+                refreshTable();
+            } else {
+                alert('Save failed.');
+            }
         });
 }
 
@@ -93,21 +88,48 @@ function deleteShipper() {
     $.ajax({ url: '/api/shippers/' + deleteId, type: 'DELETE' })
         .done(function () {
             $('#deleteDialog').dialog('close');
-            location.reload();
+            refreshTable();
         })
         .fail(function (xhr) {
             $('#deleteDialog').dialog('close');
             if (xhr.status === 404) {
                 alert('That shipper no longer exists.');
-                location.reload();
+                refreshTable();
             } else {
                 alert('Delete failed (HTTP ' + xhr.status + ').');
             }
         });
 }
 
+function actionLink(cssClass, label, row) {
+    return $('<a href="#"></a>')
+        .addClass(cssClass)
+        .text(label)
+        .attr('data-id', row.shipperId)
+        .attr('data-name', row.companyName)
+        [0].outerHTML;                       // jQuery escapes the attribute values for us
+}
+
 $(function () {
-    $('#shipperstbl').DataTable();
+    var text = $.fn.dataTable.render.text();   // HTML-escapes cell values
+
+    shippersTable = $('#shipperstbl').DataTable({
+        ajax: { url: '/api/shippers', dataSrc: '' },
+        columns: [
+            { data: 'shipperId', visible: false },
+            { data: 'companyName', render: text },
+            { data: 'phone',       render: text },
+            { data: 'addedOn',     render: text },
+            { data: 'addedBy',     render: text },
+            { data: 'editedOn',    render: text },
+            { data: 'editedBy',    render: text },
+            { data: null, orderable: false, searchable: false,
+              render: function (d, t, row) { return actionLink('edit-link', 'Edit', row); } },
+            { data: null, orderable: false, searchable: false,
+              render: function (d, t, row) { return actionLink('delete-link', 'Delete', row); } }
+        ],
+        columnDefs: [{ targets: '_all', defaultContent: '' }]   // null dates/names show as blank
+    });
 
     // Add / Edit dialog
     $('#editDialog').dialog({
@@ -130,6 +152,12 @@ $(function () {
             "Delete": function () { deleteShipper(); },
             "Cancel": function () { $(this).dialog('close'); }
         }
+    });
+
+    // Row links (delegated, because DataTables creates the rows dynamically)
+    $('#shipperstbl').on('click', '.edit-link', function (e) {
+        e.preventDefault();
+        openEditDialog($(this).data('id'));
     });
     $('#shipperstbl').on('click', '.delete-link', function (e) {
         e.preventDefault();

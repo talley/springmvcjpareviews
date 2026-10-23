@@ -1,5 +1,6 @@
 package com.talleyouro.springmvcjpademo;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 
 
@@ -38,18 +40,19 @@ public class HomeController {
 	}
 
 	@PostMapping("/edit")
-	public String saveShipper(@ModelAttribute("shipper") Shipper form) {
-
+	@ResponseBody
+	public ResponseEntity<Void> saveShipper(@ModelAttribute("shipper") Shipper form) {
 	    var existing = this.shipperRepository.findById(form.getShipperId());
-	    if (existing.isPresent()) {
-	        Shipper s = existing.get();
-	        s.setCompanyName(form.getCompanyName());
-	        s.setPhone(form.getPhone());
-	        s.setEditedBy(form.getEditedBy());
-	        s.setEditedOn(java.time.LocalDate.now());
-	        this.shipperRepository.save(s);
+	    if (existing.isEmpty()) {
+	        return ResponseEntity.notFound().build();
 	    }
-	    return "redirect:/";
+	    Shipper s = existing.get();
+	    s.setCompanyName(form.getCompanyName());
+	    s.setPhone(form.getPhone());
+	    s.setEditedBy(form.getEditedBy());
+	    s.setEditedOn(java.time.LocalDate.now());
+	    this.shipperRepository.save(s);
+	    return ResponseEntity.ok().build();
 	}
 	
 	// creating new shipper
@@ -60,10 +63,11 @@ public class HomeController {
 	}
 
 	@PostMapping("/add")
-	public String saveNewShipper(@ModelAttribute("shipper") Shipper form) {
+	@ResponseBody
+	public ResponseEntity<Void> saveNewShipper(@ModelAttribute("shipper") Shipper form) {
 	    form.setShipperId(null);
 	    form.setAddedOn(java.time.LocalDate.now());
 	    this.shipperRepository.save(form);
-	    return "redirect:/";
+	    return ResponseEntity.ok().build();
 	}
 }
